@@ -1,20 +1,21 @@
 package test.RabbitMQ;
 
-import com.rabbitmq.client.*;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 /**
- * 消息接收方
+ * 消息发送方
  * @author zhangxuan
  * @date 2018/11/23
- * @time 11:18
+ * @time 11:17
  */
-public class Receiver {
+
+public class Sender {
     public static final String QUEUE_NAME = "hello";
 
-    public static void main(String[] args) throws IOException, TimeoutException {
+    public static void main(String[] args) throws Exception{
+
         //获取工厂
         ConnectionFactory connectionFactory = new ConnectionFactory();
 
@@ -41,14 +42,13 @@ public class Receiver {
         //声明对列
         channel.queueDeclare(QUEUE_NAME,false,false,false,null);
 
-        Consumer consumer = new DefaultConsumer(channel) {
-            @Override
-            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        //声明消息内容
+        String msg = "hello rabbit";
 
-                String msg = new String(body,"utf-8");
-                System.out.println("consumer收到的消息===="+msg);
-            }
-        };
-        channel.basicConsume(QUEUE_NAME,true,consumer);
+        channel.basicPublish("",QUEUE_NAME,null,msg.getBytes("utf-8"));
+
+        //关闭资源
+        channel.close();
+        connection.close();
     }
 }
